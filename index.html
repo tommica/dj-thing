@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>DJPlayer - control the sound!</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="author" content="Tommi Carleman">
+	<link rel="stylesheet" href="./style.css">
+	<link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+</head>
+<body>
+
+<audio autoplay loop id="theSong">
+  <source src="song.mp3" type="audio/mpeg">
+</audio>
+
+<div id="speedValue">1</div>
+
+<div id="djThing" style="transform: rotateZ(100deg)">
+	<svg width="200" height="200" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform: rotateZ(-100deg)">
+		<circle cx="100" cy="100" r="100" stroke="silver" fill="black" stroke-width="3"/>
+
+		<circle cx="100" cy="100" r="20" stroke="silver" fill="black" stroke-width="3"/>
+
+		<circle cx="100" cy="30" r="10" stroke="silver" fill="black" stroke-width="3"/>
+	</svg>
+</div>
+
+<a class="song-info" href="https://audiograb.com/u/Dixxy" target="_blank">Song: those days by Dixxy</a>
+
+
+
+
+<script>
+	(function() {
+		var sound = document.getElementById('theSong');
+		var dj = document.getElementById('djThing');
+		var playSpeedHolder = document.getElementById('speedValue');
+		var playSpeed = 1;
+
+		var startMouseX = 0;
+		var followMouse = false;
+		var currentDeg = 100;
+
+		// We need to hook the mouse down to the "dj element"
+		dj.addEventListener('mousedown', function(e) {
+			startMouseX = e.clientX;
+			currentDeg = parseFloat(dj.style.transform.replace('rotateZ(', '').replace('deg)', '')) || 0;
+			followMouse = true;
+		});
+
+		// But we need to hook the mouse up itself to the whole document, so that we can catch it always
+		document.addEventListener('mouseup', function() {
+			followMouse = false;
+		});
+
+		// Mouse can be moved withing the document
+		document.addEventListener('mousemove', function(e) {
+			if(followMouse) {
+				var difference = (e.clientX - startMouseX);
+				var newDeg = currentDeg + difference;
+				dj.style.transform = 'rotateZ('+newDeg+'deg)';
+				
+				// Now somehow use the difference and playspeed to calculate the new play speed
+				updateSoundSpeed(newDeg/100);
+			}
+		});
+
+		var updateSoundSpeed = function(newSpeed) {
+			var calculatedSpeed = Math.round( (newSpeed) * 100 ) / 100;
+
+			// Caps in 10 and 0.1
+			if(calculatedSpeed > 10) {
+				calculatedSpeed = 10;
+			} else if(calculatedSpeed < 0.1) {
+				calculatedSpeed = 0.1;
+			}
+
+			sound.playbackRate = calculatedSpeed;
+			playSpeedHolder.textContent = calculatedSpeed;
+		}
+	}());
+</script>
+</body>
+</html>
